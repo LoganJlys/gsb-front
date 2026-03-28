@@ -1,0 +1,122 @@
+<div class="max-w-7xl mx-auto px-4 py-8">
+
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-800">Tableau de bord comptable</h1>
+    <p class="text-gray-400 text-sm mt-1">Bonjour, {{ user?.prenom }} — gestion des fiches de frais</p>
+  </div>
+
+  <!-- Cartes stats -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+      <p class="text-xs text-gray-400 uppercase tracking-wide">Total</p>
+      <p class="text-3xl font-bold text-gray-800 mt-1">{{ getCount('toutes') }}</p>
+      <p class="text-xs text-gray-400 mt-1">fiches</p>
+    </div>
+    <div class="bg-white rounded-2xl border border-orange-100 shadow-sm p-5">
+      <p class="text-xs text-orange-400 uppercase tracking-wide">Clôturées</p>
+      <p class="text-3xl font-bold text-orange-600 mt-1">{{ getCount('CLOTUREE') }}</p>
+      <p class="text-xs text-gray-400 mt-1">à valider</p>
+    </div>
+    <div class="bg-white rounded-2xl border border-blue-100 shadow-sm p-5">
+      <p class="text-xs text-blue-400 uppercase tracking-wide">Validées</p>
+      <p class="text-3xl font-bold text-blue-600 mt-1">{{ getCount('VALIDEE') }}</p>
+      <p class="text-xs text-gray-400 mt-1">en attente paiement</p>
+    </div>
+    <div class="bg-white rounded-2xl border border-green-100 shadow-sm p-5">
+      <p class="text-xs text-green-400 uppercase tracking-wide">Remboursées</p>
+      <p class="text-3xl font-bold text-green-600 mt-1">{{ getCount('REMBOURSEE') }}</p>
+      <p class="text-xs text-gray-400 mt-1">ce mois</p>
+    </div>
+  </div>
+
+  <!-- Onglets filtre -->
+  <div class="flex flex-wrap items-center gap-2 mb-4">
+    <button *ngFor="let onglet of [
+      {key: 'toutes', label: 'Toutes'},
+      {key: 'EN_COURS', label: 'En cours'},
+      {key: 'CLOTUREE', label: 'Clôturées'},
+      {key: 'VALIDEE', label: 'Validées'},
+      {key: 'MISE_EN_PAIEMENT', label: 'En paiement'},
+      {key: 'REMBOURSEE', label: 'Remboursées'}
+    ]"
+      (click)="ongletActif = onglet.key"
+      [class]="ongletActif === onglet.key
+        ? 'px-4 py-2 rounded-lg text-sm font-medium bg-blue-600 text-white'
+        : 'px-4 py-2 rounded-lg text-sm font-medium text-gray-500 hover:bg-gray-100 transition'">
+      {{ onglet.label }}
+      <span class="ml-1 text-xs opacity-70">({{ getCount(onglet.key) }})</span>
+    </button>
+  </div>
+
+  <!-- Tableau -->
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50 text-gray-400 uppercase text-xs tracking-wide">
+          <tr>
+            <th class="px-6 py-3 text-left">Visiteur</th>
+            <th class="px-6 py-3 text-left">Mois</th>
+            <th class="px-6 py-3 text-left">Dernière modification</th>
+            <th class="px-6 py-3 text-left">Statut</th>
+            <th class="px-6 py-3 text-left">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let fiche of getFichesFiltrees()"
+            class="border-t border-gray-50 hover:bg-gray-50 transition">
+
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-semibold text-xs">
+                  {{ fiche.user?.prenom?.charAt(0) }}{{ fiche.user?.nom?.charAt(0) }}
+                </div>
+                <div>
+                  <p class="font-medium text-gray-700">{{ fiche.user?.prenom }} {{ fiche.user?.nom }}</p>
+                  <p class="text-xs text-gray-400">{{ fiche.user?.cp }}</p>
+                </div>
+              </div>
+            </td>
+
+            <td class="px-6 py-4 text-gray-600">
+              {{ getMoisFormate(fiche.mois) }}
+            </td>
+
+            <td class="px-6 py-4 text-gray-500">
+              {{ fiche.dateModif | date:'dd/MM/yyyy' }}
+            </td>
+
+            <td class="px-6 py-4">
+              <span [class]="'px-3 py-1 rounded-full text-xs font-medium border ' + getStatutStyle(fiche.statut)">
+                {{ getStatutLabel(fiche.statut) }}
+              </span>
+            </td>
+
+            <td class="px-6 py-4 flex items-center gap-2">
+              <button (click)="voirDetail(fiche.id)"
+                class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium px-3 py-1 rounded-lg transition">
+                Voir →
+              </button>
+              <button *ngIf="getProchainStatut(fiche.statut)"
+                (click)="changerStatut(fiche.id, getProchainStatut(fiche.statut)!)"
+                class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-3 py-1 rounded-lg transition">
+                {{ getProchainStatutLabel(fiche.statut) }}
+              </button>
+              <span *ngIf="!getProchainStatut(fiche.statut)" class="text-gray-300 text-xs">
+                —
+              </span>
+            </td>
+
+          </tr>
+
+          <tr *ngIf="getFichesFiltrees().length === 0">
+            <td colspan="5" class="px-6 py-12 text-center text-gray-400 text-sm">
+              Aucune fiche trouvée
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

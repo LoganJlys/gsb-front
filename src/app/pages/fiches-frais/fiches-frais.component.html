@@ -1,0 +1,62 @@
+<div class="max-w-5xl mx-auto px-4 py-8">
+
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-800">Mes fiches de frais</h1>
+    <p class="text-gray-400 text-sm mt-1">Historique de toutes vos fiches</p>
+  </div>
+
+  <!-- Tableau -->
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100">
+
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+      <h2 class="font-semibold text-gray-700">Fiches de frais</h2>
+      <span class="bg-blue-50 text-blue-600 text-xs font-medium px-3 py-1 rounded-full">
+        {{ fiches.length }} fiche(s)
+      </span>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50 text-gray-400 uppercase text-xs tracking-wide">
+          <tr>
+            <th class="px-6 py-3 text-left">Mois</th>
+            <th class="px-6 py-3 text-left">Dernière modification</th>
+            <th class="px-6 py-3 text-left">Statut</th>
+            <th class="px-6 py-3 text-left">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let fiche of fiches"
+            class="border-t border-gray-50 hover:bg-gray-50 transition">
+            <td class="px-6 py-4 font-medium text-gray-700">
+              {{ getMoisFormate(fiche.mois) }}
+            </td>
+            <td class="px-6 py-4 text-gray-500">
+              {{ fiche.dateModif | date:'dd/MM/yyyy' }}
+            </td>
+            <td class="px-6 py-4">
+              <span class="px-3 py-1 rounded-full text-xs font-medium bg-yellow-50 text-yellow-600 border border-yellow-100">
+                En cours
+              </span>
+            </td>
+            <td class="px-6 py-4">
+              <button (click)="allerSaisie(fiche)"
+                class="text-blue-600 hover:text-blue-700 text-xs font-medium hover:underline">
+                Modifier →
+              </button>
+            </td>
+          </tr>
+
+          <tr *ngIf="fiches.length === 0">
+            <td colspan="4" class="px-6 py-12 text-center text-gray-400 text-sm">
+              Aucune fiche de frais pour l'instant
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+</div>

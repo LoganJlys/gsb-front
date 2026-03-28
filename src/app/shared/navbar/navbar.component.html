@@ -1,0 +1,81 @@
+<nav class="bg-white border-b border-gray-200 shadow-sm fixed top-0 left-0 w-full z-50">
+  <div class="max-w-7xl mx-auto px-4">
+    <div class="flex items-center justify-between h-16">
+
+      <!-- Logo cliquable -->
+      <div class="flex items-center gap-2 cursor-pointer"
+        (click)="user?.role === 'comptable' ? router.navigate(['/dashboard-comptable']) : router.navigate(['/dashboard'])">
+        <div class="bg-blue-600 text-white font-bold text-lg px-3 py-1 rounded-lg">
+          GSB
+        </div>
+      </div>
+
+      <!-- Menu desktop -->
+      <div class="hidden md:flex items-center gap-1">
+
+        <!-- VISITEUR -->
+        <ng-container *ngIf="user?.role === 'visiteur'">
+          <a routerLink="/dashboard" routerLinkActive="bg-blue-50 text-blue-600"
+            class="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition">
+            Dashboard
+          </a>
+          <a routerLink="/fiches-frais" routerLinkActive="bg-blue-50 text-blue-600"
+            class="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition">
+            Mes fiches
+          </a>
+        </ng-container>
+
+      </div>
+
+      <!-- Partie droite -->
+      <div class="hidden md:flex items-center gap-3">
+                <button (click)="logout()"
+          class="px-3 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-lg transition">
+          Déconnexion
+        </button>
+      </div>
+
+      <!-- Burger mobile -->
+      <div class="md:hidden">
+        <button (click)="toggleMenu()"
+          class="p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path *ngIf="!menuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 6h16M4 12h16M4 18h16"/>
+            <path *ngIf="menuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Menu mobile -->
+  <div *ngIf="menuOpen" class="md:hidden px-4 pb-4 space-y-1 bg-white border-t border-gray-100">
+
+    <!-- VISITEUR -->
+    <ng-container *ngIf="user?.role === 'visiteur'">
+      <a routerLink="/dashboard"
+        class="block px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-blue-50 hover:text-blue-600">
+        Dashboard
+      </a>
+      <a routerLink="/fiches-frais"
+        class="block px-4 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-blue-50 hover:text-blue-600">
+        Mes fiches
+      </a>
+    </ng-container>
+
+    <div class="pt-2 border-t border-gray-100">
+      <button (click)="logout()"
+        class="w-full text-left px-4 py-2 text-sm font-medium text-red-500 hover:bg-red-50 rounded-lg">
+        Déconnexion
+      </button>
+    </div>
+
+  </div>
+
+</nav>
+
+<!-- Spacer -->
+<div class="h-16"></div>

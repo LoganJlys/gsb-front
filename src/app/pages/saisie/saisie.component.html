@@ -1,0 +1,163 @@
+<div class="max-w-4xl mx-auto px-4 py-8">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-800">Saisie des frais</h1>
+      <p class="text-gray-400 text-sm mt-1">Fiche n° {{ fiche?.id }}</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <button (click)="router.navigate(['/dashboard'])"
+        class="text-sm text-gray-500 hover:text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-100 transition">
+        ← Retour
+      </button>
+      <button (click)="envoyerFiche()"
+        class="bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-6 py-2 rounded-lg transition">
+        Envoyer la fiche ✓
+      </button>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div *ngIf="succes"
+    class="bg-green-50 border border-green-200 text-green-600 text-sm px-4 py-3 rounded-lg mb-4">
+    ✓ {{ succes }}
+  </div>
+  <div *ngIf="erreur"
+    class="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-lg mb-4">
+    ✗ {{ erreur }}
+  </div>
+
+  <!-- Frais forfait -->
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 mb-6">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+      <div>
+        <h2 class="font-semibold text-gray-700">Frais forfaitisés</h2>
+        <p class="text-gray-400 text-xs mt-1">Modifiez les quantités puis cliquez sur Sauvegarder tout</p>
+      </div>
+      <button (click)="sauvegarderForfait()" [disabled]="saving"
+        class="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white text-xs font-medium px-4 py-2 rounded-lg transition">
+        {{ saving ? 'Sauvegarde...' : 'Sauvegarder tout' }}
+      </button>
+    </div>
+
+    <div class="p-6 space-y-3">
+      <div *ngFor="let ligne of lignesForfait"
+        class="flex items-center justify-between gap-4 p-4 bg-gray-50 rounded-xl">
+
+        <div class="flex-1">
+          <p class="font-medium text-gray-700 text-sm">{{ ligne.fraisForfait?.libelle }}</p>
+          <p class="text-gray-400 text-xs mt-1">{{ ligne.fraisForfait?.montant }}€ / unité</p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button (click)="ligne.quantite = ligne.quantite > 0 ? ligne.quantite - 1 : 0"
+            class="w-8 h-8 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-600 font-bold transition">
+            −
+          </button>
+          <input [(ngModel)]="ligne.quantite" type="number" min="0"
+            class="w-16 px-2 py-2 border border-gray-300 rounded-lg text-sm text-center focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+          <button (click)="ligne.quantite = ligne.quantite + 1"
+            class="w-8 h-8 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-600 font-bold transition">
+            +
+          </button>
+        </div>
+
+        <p class="font-semibold text-gray-700 text-sm w-20 text-right">
+          {{ (ligne.quantite * (ligne.fraisForfait?.montant || 0)) | number:'1.2-2' }}€
+        </p>
+
+      </div>
+
+      <!-- Total forfait -->
+      <div class="flex justify-end pt-2 border-t border-gray-100">
+        <p class="text-sm font-semibold text-gray-700">
+          Total forfait : {{ getTotalForfait() | number:'1.2-2' }}€
+        </p>
+      </div>
+
+      <div *ngIf="lignesForfait.length === 0"
+        class="text-center text-gray-400 text-sm py-4">
+        Aucun frais forfait
+      </div>
+    </div>
+  </div>
+
+  <!-- Frais hors forfait -->
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 mb-6">
+    <div class="px-6 py-4 border-b border-gray-100">
+      <h2 class="font-semibold text-gray-700">Frais hors forfait</h2>
+      <p class="text-gray-400 text-xs mt-1">Dépenses libres avec justificatif obligatoire</p>
+    </div>
+
+    <div class="p-6">
+
+      <!-- Liste -->
+      <div class="space-y-3 mb-6">
+        <div *ngFor="let ligne of lignesHorsForfait"
+          class="flex items-center justify-between gap-4 p-4 bg-gray-50 rounded-xl">
+          <div class="flex-1">
+            <p class="font-medium text-gray-700 text-sm">{{ ligne.libelle }}</p>
+            <p class="text-gray-400 text-xs mt-1">{{ ligne.date | date:'dd/MM/yyyy' }}</p>
+          </div>
+          <p class="font-semibold text-gray-700 text-sm">{{ ligne.montant }}€</p>
+          <button (click)="supprimerHorsForfait(ligne.id)"
+            class="text-red-400 hover:text-red-600 text-xs font-medium px-3 py-1 rounded-lg hover:bg-red-50 transition">
+            Supprimer
+          </button>
+        </div>
+
+        <!-- Total hors forfait -->
+        <div *ngIf="lignesHorsForfait.length > 0"
+          class="flex items-center justify-between pt-2 border-t border-gray-100">
+          <p class="text-xs text-gray-400">{{ lignesHorsForfait.length }} élément(s)</p>
+          <p class="text-sm font-semibold text-gray-700">
+            Total hors forfait : {{ getTotalHorsForfait() | number:'1.2-2' }}€
+          </p>
+        </div>
+
+        <div *ngIf="lignesHorsForfait.length === 0"
+          class="text-center text-gray-400 text-sm py-4">
+          Aucun frais hors forfait
+        </div>
+      </div>
+
+      <!-- Formulaire ajout -->
+      <div class="border-t border-gray-100 pt-6">
+        <p class="text-sm font-medium text-gray-600 mb-4">Ajouter un frais</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs text-gray-500 mb-1">Date</label>
+            <input [(ngModel)]="nouvelleLigne.date" type="date"
+              [min]="dateMin" [max]="dateMax"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+          </div>
+          <div>
+            <label class="block text-xs text-gray-500 mb-1">Libellé</label>
+            <input [(ngModel)]="nouvelleLigne.libelle" type="text" placeholder="Ex: Taxi aéroport"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+          </div>
+          <div>
+            <label class="block text-xs text-gray-500 mb-1">Montant (€)</label>
+            <input [(ngModel)]="nouvelleLigne.montant" type="number" placeholder="0.00"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+          </div>
+        </div>
+        <button (click)="ajouterHorsForfait()"
+          class="mt-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-6 py-2 rounded-lg transition">
+          + Ajouter
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Total général -->
+  <div class="bg-blue-600 rounded-2xl p-6 text-white flex items-center justify-between">
+    <p class="font-semibold text-lg">Total général</p>
+    <p class="font-bold text-2xl">
+      {{ (getTotalForfait() + getTotalHorsForfait()) | number:'1.2-2' }}€
+    </p>
+  </div>
+
+</div>
